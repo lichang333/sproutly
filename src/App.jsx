@@ -7,6 +7,7 @@ import LoginScreen from './components/LoginScreen'
 import ActivityLog from './components/ActivityLog'
 import { loadState, saveState } from './utils/storage'
 import { supabase } from './lib/supabase'
+import { state as stateApi } from './lib/api'
 import { playChime, sendNotification, requestNotificationPermission } from './utils/notify'
 import { useTheme } from './hooks/useTheme'
 import './App.css'
@@ -23,27 +24,50 @@ function MainApp({ user, onLogout }) {
   const [activities, setActivities] = useState([])
   const [showCelebration, setShowCelebration] = useState(null)
   const [isTimerRunning, setIsTimerRunning] = useState(false)
+  const syncTimerRef = useRef(null)
 
   // Request notification permission once on mount
   useEffect(() => { requestNotificationPermission() }, [])
 
+  // Load state: server first (cross-device), fallback to localStorage
   useEffect(() => {
-    const saved = loadState(user.username)
-    if (saved) {
-      setStars(saved.stars ?? 0)
-      setCompletedPomodoros(saved.completedPomodoros ?? 0)
-      setInterruptions(saved.interruptions ?? 0)
-      setStickers(saved.stickers ?? [])
-      setTasks(saved.tasks ?? [])
-      setActivities(saved.activities ?? [])
+    const local = loadState(user.username)
+    if (local) {
+      setStars(local.stars ?? 0)
+      setCompletedPomodoros(local.completedPomodoros ?? 0)
+      setInterruptions(local.interruptions ?? 0)
+      setStickers(local.stickers ?? [])
+      setTasks(local.tasks ?? [])
+      setActivities(local.activities ?? [])
     }
-    setInitialized(true)
-  }, [user.username])
 
+    if (user.token) {
+      stateApi.load().then(remote => {
+        setStars(remote.stars ?? 0)
+        setCompletedPomodoros(remote.completed_pomodoros ?? 0)
+        setInterruptions(remote.interruptions ?? 0)
+        setStickers(remote.stickers ?? [])
+      }).catch(() => {}).finally(() => setInitialized(true))
+    } else {
+      setInitialized(true)
+    }
+  }, [user.username, user.token])
+
+  // Save to localStorage immediately
   useEffect(() => {
     if (!initialized) return
     saveState(user.username, { stars, completedPomodoros, interruptions, stickers, tasks, activities })
   }, [initialized, user.username, stars, completedPomodoros, interruptions, stickers, tasks, activities])
+
+  // Sync to server with 3s debounce
+  useEffect(() => {
+    if (!initialized || !user.token) return
+    clearTimeout(syncTimerRef.current)
+    syncTimerRef.current = setTimeout(() => {
+      stateApi.save({ stars, completed_pomodoros: completedPomodoros, interruptions, stickers }).catch(() => {})
+    }, 3000)
+    return () => clearTimeout(syncTimerRef.current)
+  }, [initialized, user.token, stars, completedPomodoros, interruptions, stickers])
 
   const addActivity = useCallback(async (type, message) => {
     const id = Date.now()
@@ -164,7 +188,11 @@ export default function App() {
   useTheme()
 
   const [user, setUser] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('pomodoro_user')) } catch { return null }
+    try {
+      const saved = JSON.parse(localStorage.getItem('pomodoro_user'))
+      if (saved) saved.token = localStorage.getItem('pomodoro_token') || null
+      return saved
+    } catch { return null }
   })
 
   const handleLogin = (userData) => {
@@ -174,6 +202,7 @@ export default function App() {
 
   const handleLogout = () => {
     localStorage.removeItem('pomodoro_user')
+    localStorage.removeItem('pomodoro_token')
     setUser(null)
   }
 

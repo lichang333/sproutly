@@ -62,6 +62,12 @@ export const stickers = {
   list: () => request('/stickers'),
 }
 
+// User state (cross-device sync)
+export const state = {
+  load: () => request('/state'),
+  save: (data) => request('/state', { method: 'PUT', body: data }),
+}
+
 // Stats
 export const stats = {
   daily: (days = 7) => request(`/stats/daily?days=${days}`),
