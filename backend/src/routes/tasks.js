@@ -33,6 +33,7 @@ router.patch('/:id', async (req, res) => {
   const values = []
   let idx = 1
 
+  const { completed_pomodoros, done, text, emoji, estimated_pomodoros } = req.body
   if (completed_pomodoros !== undefined) {
     updates.push(`completed_pomodoros = $${idx++}`)
     values.push(completed_pomodoros)
@@ -41,6 +42,18 @@ router.patch('/:id', async (req, res) => {
     updates.push(`done = $${idx++}`)
     values.push(done)
     if (done) { updates.push(`done_at = NOW()`) }
+  }
+  if (text !== undefined) {
+    updates.push(`text = $${idx++}`)
+    values.push(text.trim())
+  }
+  if (emoji !== undefined) {
+    updates.push(`emoji = $${idx++}`)
+    values.push(emoji)
+  }
+  if (estimated_pomodoros !== undefined) {
+    updates.push(`estimated_pomodoros = $${idx++}`)
+    values.push(estimated_pomodoros)
   }
   if (!updates.length) return res.status(400).json({ error: '无更新内容' })
 

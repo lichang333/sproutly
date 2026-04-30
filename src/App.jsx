@@ -7,7 +7,7 @@ import LoginScreen from './components/LoginScreen'
 import ActivityLog from './components/ActivityLog'
 import { loadState, saveState } from './utils/storage'
 import { supabase } from './lib/supabase'
-import { state as stateApi, sessions } from './lib/api'
+import { state as stateApi, sessions, tasks as tasksApi } from './lib/api'
 import { playChime, sendNotification, requestNotificationPermission } from './utils/notify'
 import { useTheme } from './hooks/useTheme'
 import './App.css'
@@ -43,12 +43,22 @@ function MainApp({ user, onLogout }) {
     }
 
     if (user.token) {
-      stateApi.load().then(remote => {
-        setStars(remote.stars ?? 0)
-        setCompletedPomodoros(remote.completed_pomodoros ?? 0)
-        setInterruptions(remote.interruptions ?? 0)
-        setStickers(remote.stickers ?? [])
-      }).catch(() => {}).finally(() => setInitialized(true))
+      const today = new Date().toISOString().slice(0, 10)
+      Promise.all([stateApi.load(), tasksApi.list(today)])
+        .then(([remote, remoteTasks]) => {
+          setStars(remote.stars ?? 0)
+          setCompletedPomodoros(remote.completed_pomodoros ?? 0)
+          setInterruptions(remote.interruptions ?? 0)
+          setStickers(remote.stickers ?? [])
+          setTasks(remoteTasks.map(t => ({
+            id: t.id,
+            text: t.text,
+            emoji: t.emoji,
+            estimated: t.estimated_pomodoros,
+            completed: t.completed_pomodoros,
+            done: t.done,
+          })))
+        }).catch(() => {}).finally(() => setInitialized(true))
     } else {
       setInitialized(true)
     }
@@ -135,16 +145,22 @@ function MainApp({ user, onLogout }) {
 
   const handleInterrupt = useCallback(() => setInterruptions(i => i + 1), [])
 
-  const handleAddTask = useCallback((taskData) => {
-    setTasks(prev => [...prev, {
-      id: Date.now(),
-      text: taskData.text,
-      emoji: taskData.emoji,
-      estimated: taskData.estimated_pomodoros,
-      completed: 0,
-      done: false,
-    }])
-  }, [])
+  const handleAddTask = useCallback(async (taskData) => {
+    if (user.token) {
+      try {
+        const t = await tasksApi.create(taskData)
+        setTasks(prev => [...prev, {
+          id: t.id, text: t.text, emoji: t.emoji,
+          estimated: t.estimated_pomodoros, completed: t.completed_pomodoros, done: t.done,
+        }])
+      } catch {}
+    } else {
+      setTasks(prev => [...prev, {
+        id: Date.now(), text: taskData.text, emoji: taskData.emoji,
+        estimated: taskData.estimated_pomodoros, completed: 0, done: false,
+      }])
+    }
+  }, [user.token])
 
   const handleModeStart = useCallback((mode) => {
     if (mode === 'focus') {
@@ -181,6 +197,7 @@ function MainApp({ user, onLogout }) {
           onAddTask={handleAddTask}
           onInterrupt={handleInterrupt}
           isTimerRunning={isTimerRunning}
+          userToken={user.token}
         />
         <RewardPanel stars={stars} stickers={stickers} completedPomodoros={completedPomodoros} />
         <ActivityLog activities={activities} />

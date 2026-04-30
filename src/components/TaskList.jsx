@@ -1,9 +1,10 @@
 import { useState } from 'react'
+import { tasks as tasksApi } from '../lib/api'
 import './TaskList.css'
 
 const EMOJI_OPTIONS = ['📚', '✏️', '🔢', '🔬', '🎨', '🌍', '🎵', '💻']
 
-export default function TaskList({ tasks, setTasks, onAddTask, onInterrupt, isTimerRunning }) {
+export default function TaskList({ tasks, setTasks, onAddTask, onInterrupt, isTimerRunning, userToken }) {
   const [newTask, setNewTask] = useState('')
   const [newEmoji, setNewEmoji] = useState('📚')
   const [newPomodoros, setNewPomodoros] = useState(2)
@@ -22,11 +23,15 @@ export default function TaskList({ tasks, setTasks, onAddTask, onInterrupt, isTi
     setNewPomodoros(2)
   }
 
-  const completeTask = (id) =>
+  const completeTask = (id) => {
     setTasks(prev => prev.map(t => t.id === id ? { ...t, done: true, doneAt: Date.now() } : t))
+    if (userToken) tasksApi.update(id, { done: true }).catch(() => {})
+  }
 
-  const deleteTask = (id) =>
+  const deleteTask = (id) => {
     setTasks(prev => prev.filter(t => t.id !== id))
+    if (userToken) tasksApi.delete(id).catch(() => {})
+  }
 
   const startEdit = (task) => {
     setEditingId(task.id)
@@ -40,6 +45,9 @@ export default function TaskList({ tasks, setTasks, onAddTask, onInterrupt, isTi
     setTasks(prev => prev.map(t =>
       t.id === editingId ? { ...t, text: editText.trim(), emoji: editEmoji, estimated: editPomodoros } : t
     ))
+    if (userToken) tasksApi.update(editingId, {
+      text: editText.trim(), emoji: editEmoji, estimated_pomodoros: editPomodoros
+    }).catch(() => {})
     setEditingId(null)
   }
 
