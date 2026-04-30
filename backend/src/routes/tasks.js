@@ -28,12 +28,10 @@ router.post('/', async (req, res) => {
 
 // PATCH /api/tasks/:id — 更新任务（完成番茄数 / 标记完成）
 router.patch('/:id', async (req, res) => {
-  const { completed_pomodoros, done } = req.body
+  const { completed_pomodoros, done, text, emoji, estimated_pomodoros } = req.body
   const updates = []
   const values = []
   let idx = 1
-
-  const { completed_pomodoros, done, text, emoji, estimated_pomodoros } = req.body
   if (completed_pomodoros !== undefined) {
     updates.push(`completed_pomodoros = $${idx++}`)
     values.push(completed_pomodoros)
