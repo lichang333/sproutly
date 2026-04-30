@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useTimer, MODES } from '../hooks/useTimer'
+import { unlockAudio } from '../utils/notify'
 import './Timer.css'
 
 const SIZE = 220
@@ -40,12 +41,14 @@ export default function Timer({ onPomodoroComplete, onBreakEnd, onRunningChange,
   useEffect(() => { onRunningChange?.(isRunning) }, [isRunning, onRunningChange])
 
   const handleStart = () => {
+    unlockAudio()
     const modeMap = { FOCUS: 'focus', SHORT_BREAK: 'short_break', LONG_BREAK: 'long_break' }
     onModeStart?.(modeMap[mode])
     start()
   }
 
   const handleReset = () => {
+    unlockAudio()
     if (mode === 'FOCUS' && progress > 0) {
       onFocusAbort?.()
     }
