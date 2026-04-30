@@ -4,7 +4,9 @@ import Timer from './components/Timer'
 import TaskList from './components/TaskList'
 import RewardPanel from './components/RewardPanel'
 import LoginScreen from './components/LoginScreen'
+import ActivityLog from './components/ActivityLog'
 import { loadState, saveState } from './utils/storage'
+import { supabase } from './lib/supabase'
 import { playChime, sendNotification, requestNotificationPermission } from './utils/notify'
 import { useTheme } from './hooks/useTheme'
 import './App.css'
@@ -18,6 +20,7 @@ function MainApp({ user, onLogout }) {
   const [interruptions, setInterruptions] = useState(0)
   const [stickers, setStickers] = useState([])
   const [tasks, setTasks] = useState([])
+  const [activities, setActivities] = useState([])
   const [showCelebration, setShowCelebration] = useState(null)
   const [isTimerRunning, setIsTimerRunning] = useState(false)
 
@@ -32,16 +35,39 @@ function MainApp({ user, onLogout }) {
       setInterruptions(saved.interruptions ?? 0)
       setStickers(saved.stickers ?? [])
       setTasks(saved.tasks ?? [])
+      setActivities(saved.activities ?? [])
     }
     setInitialized(true)
   }, [user.username])
 
   useEffect(() => {
     if (!initialized) return
-    saveState(user.username, { stars, completedPomodoros, interruptions, stickers, tasks })
-  }, [initialized, user.username, stars, completedPomodoros, interruptions, stickers, tasks])
+    saveState(user.username, { stars, completedPomodoros, interruptions, stickers, tasks, activities })
+  }, [initialized, user.username, stars, completedPomodoros, interruptions, stickers, tasks, activities])
+
+  const addActivity = useCallback(async (type, message) => {
+    const id = Date.now()
+    const activityData = { id, type, message, timestamp: id, status: supabase ? 'pending' : 'local' }
+    setActivities(prev => [activityData, ...prev])
+
+    if (supabase) {
+      try {
+        await supabase.from('user_activities').insert([{
+          username: user.username,
+          type,
+          message,
+          created_at: new Date(id).toISOString()
+        }])
+        setActivities(prev => prev.map(a => a.id === id ? { ...a, status: 'ok' } : a))
+      } catch (err) {
+        console.error('Database save failed:', err)
+        setActivities(prev => prev.map(a => a.id === id ? { ...a, status: 'error' } : a))
+      }
+    }
+  }, [user.username])
 
   const handlePomodoroComplete = useCallback(() => {
+    addActivity('FOCUS_COMPLETE', '完成了一次专注 🌱')
     playChime('complete')
     sendNotification('🌱 专注时间结束！', '棒棒哒！给小芽浇过水了，去休息一下吧 💧')
     setStars(s => s + 1)
@@ -65,9 +91,15 @@ function MainApp({ user, onLogout }) {
   }, [])
 
   const handleBreakEnd = useCallback(() => {
+    addActivity('BREAK_COMPLETE', '休息结束')
     playChime('break_end')
     sendNotification('⏰ 休息结束！', '准备好了吗？开始下一次专注 🌱')
   }, [])
+
+  const handleFocusAbort = useCallback(() => {
+    addActivity('FOCUS_ABORT', '中途放弃了这次专注 😔')
+  }, [addActivity])
+
   const handleInterrupt = useCallback(() => setInterruptions(i => i + 1), [])
 
   const handleAddTask = useCallback((taskData) => {
@@ -80,6 +112,12 @@ function MainApp({ user, onLogout }) {
       done: false,
     }])
   }, [])
+
+  const handleModeStart = useCallback((mode) => {
+    if (mode === 'focus') addActivity('FOCUS_START', '开始专注')
+    else if (mode === 'short_break') addActivity('BREAK_START', '开始短休息')
+    else if (mode === 'long_break') addActivity('BREAK_START', '开始长休息')
+  }, [addActivity])
 
   return (
     <div className="app-shell">
@@ -94,6 +132,8 @@ function MainApp({ user, onLogout }) {
           onPomodoroComplete={handlePomodoroComplete}
           onBreakEnd={handleBreakEnd}
           onRunningChange={setIsTimerRunning}
+          onModeStart={handleModeStart}
+          onFocusAbort={handleFocusAbort}
         />
         <TaskList
           tasks={tasks}
@@ -103,6 +143,7 @@ function MainApp({ user, onLogout }) {
           isTimerRunning={isTimerRunning}
         />
         <RewardPanel stars={stars} stickers={stickers} completedPomodoros={completedPomodoros} />
+        <ActivityLog activities={activities} />
         <p className="app-footer-tip">专注25分钟 🌱 休息5分钟 · 4次专注后大休息 🌙</p>
       </main>
 

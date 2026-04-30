@@ -9,6 +9,10 @@ export default function TaskList({ tasks, setTasks, onAddTask, onInterrupt, isTi
   const [newPomodoros, setNewPomodoros] = useState(2)
   const [showInterrupt, setShowInterrupt] = useState(false)
   const [interruptNote, setInterruptNote] = useState('')
+  const [editingId, setEditingId] = useState(null)
+  const [editText, setEditText] = useState('')
+  const [editEmoji, setEditEmoji] = useState('📚')
+  const [editPomodoros, setEditPomodoros] = useState(2)
 
   const addTask = (e) => {
     e.preventDefault()
@@ -23,6 +27,23 @@ export default function TaskList({ tasks, setTasks, onAddTask, onInterrupt, isTi
 
   const deleteTask = (id) =>
     setTasks(prev => prev.filter(t => t.id !== id))
+
+  const startEdit = (task) => {
+    setEditingId(task.id)
+    setEditText(task.text)
+    setEditEmoji(task.emoji)
+    setEditPomodoros(task.estimated)
+  }
+
+  const saveEdit = () => {
+    if (!editText.trim()) return
+    setTasks(prev => prev.map(t =>
+      t.id === editingId ? { ...t, text: editText.trim(), emoji: editEmoji, estimated: editPomodoros } : t
+    ))
+    setEditingId(null)
+  }
+
+  const cancelEdit = () => setEditingId(null)
 
   const submitInterrupt = () => {
     onInterrupt(interruptNote)
@@ -47,18 +68,54 @@ export default function TaskList({ tasks, setTasks, onAddTask, onInterrupt, isTi
           <div className="task-empty">还没有任务，加一个吧！📝</div>
         )}
         {tasks.map(task => (
-          <div key={task.id} className={`task-item ${task.done ? 'done' : ''}`}>
-            <span className="task-emoji">{task.emoji}</span>
-            <span className="task-text">{task.text}</span>
-            <div className="task-tomatoes">
-              {Array.from({ length: task.estimated }).map((_, i) => (
-                <span key={i} className={`task-tomato-dot ${i < task.completed ? 'filled' : ''}`}>🌱</span>
-              ))}
-            </div>
-            {!task.done && (
-              <button className="task-check-btn" onClick={() => completeTask(task.id)} title="完成">✓</button>
+          <div key={task.id} className={`task-item ${task.done ? 'done' : ''} ${editingId === task.id ? 'editing' : ''}`}>
+            {editingId === task.id ? (
+              <div className="task-edit-form">
+                <div className="task-edit-row">
+                  <select value={editEmoji} onChange={e => setEditEmoji(e.target.value)} className="emoji-select emoji-select-sm">
+                    {EMOJI_OPTIONS.map(e => <option key={e} value={e}>{e}</option>)}
+                  </select>
+                  <input
+                    className="input task-input"
+                    value={editText}
+                    onChange={e => setEditText(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') saveEdit(); if (e.key === 'Escape') cancelEdit() }}
+                    autoFocus
+                  />
+                </div>
+                <div className="task-edit-row">
+                  <span className="form-label">番茄数：</span>
+                  <div className="pomodoro-picker">
+                    {[1,2,3,4,5].map(n => (
+                      <button key={n} type="button"
+                        className={`pomodoro-pick-btn ${editPomodoros === n ? 'active' : ''}`}
+                        onClick={() => setEditPomodoros(n)}>
+                        {'🌱'.repeat(n)}
+                      </button>
+                    ))}
+                  </div>
+                  <button className="btn btn-primary btn-sm" style={{ marginLeft: 'auto' }} onClick={saveEdit}>保存</button>
+                  <button className="btn btn-ghost btn-sm" onClick={cancelEdit}>取消</button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <span className="task-emoji">{task.emoji}</span>
+                <span className="task-text">{task.text}</span>
+                <div className="task-tomatoes">
+                  {Array.from({ length: task.estimated }).map((_, i) => (
+                    <span key={i} className={`task-tomato-dot ${i < task.completed ? 'filled' : ''}`}>🌱</span>
+                  ))}
+                </div>
+                {!task.done && (
+                  <>
+                    <button className="task-edit-btn" onClick={() => startEdit(task)} title="编辑">✏️</button>
+                    <button className="task-check-btn" onClick={() => completeTask(task.id)} title="完成">✓</button>
+                  </>
+                )}
+                <button className="task-del-btn" onClick={() => deleteTask(task.id)} title="删除">✕</button>
+              </>
             )}
-            <button className="task-del-btn" onClick={() => deleteTask(task.id)} title="删除">✕</button>
           </div>
         ))}
       </div>

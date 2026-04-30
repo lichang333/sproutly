@@ -111,3 +111,18 @@ select
 from pomodoro_sessions ps
 join profiles p on p.id = ps.user_id
 group by ps.user_id, ps.date, p.username;
+
+-- ============================================================
+-- 活动记录日志 (Activity Log)
+-- ============================================================
+create table if not exists user_activities (
+  id uuid default gen_random_uuid() primary key,
+  username text not null,
+  type text not null,
+  message text not null,
+  created_at timestamptz default now()
+);
+
+-- 允许匿名/普通插入 (如果未使用Supabase Auth，可以跳过RLS)
+-- alter table user_activities enable row level security;
+-- create policy "Allow insert for all" on user_activities for insert with check (true);

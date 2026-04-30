@@ -74,6 +74,46 @@
 .task-tomato-dot { font-size: 12px; opacity: 0.25; }
 .task-tomato-dot.filled { opacity: 1; }
 
+.task-edit-btn {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: transparent;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.1s;
+  flex-shrink: 0;
+}
+.task-edit-btn:hover { border-color: var(--duo-yellow); background: #FFFBE5; }
+
+.task-item.editing {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+.task-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.task-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.emoji-select-sm {
+  width: 44px;
+  height: 40px;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
 .task-check-btn {
   width: 28px; height: 28px;
   border-radius: 50%;

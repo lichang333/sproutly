@@ -10,7 +10,7 @@ export function loadState(username) {
     if (!saved) return null
     const parsed = JSON.parse(saved)
     if (parsed.date !== TODAY) {
-      return { ...parsed, date: TODAY, stars: 0, completedPomodoros: 0, interruptions: 0, stickers: parsed.stickers ?? [] }
+      return { ...parsed, date: TODAY, stars: 0, completedPomodoros: 0, interruptions: 0, stickers: parsed.stickers ?? [], activities: [] }
     }
     return parsed
   } catch {
