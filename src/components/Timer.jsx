@@ -53,7 +53,7 @@ export default function Timer({ onPomodoroComplete, onBreakEnd, onRunningChange,
   }
 
   const cfg = MODE_CONFIG[mode]
-  const dashOffset = CIRCUMFERENCE * (1 - progress)
+  const dashOffset = CIRCUMFERENCE * progress
   const isPaused = !isRunning && progress > 0 && progress < 1
 
   return (
