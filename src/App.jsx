@@ -44,21 +44,26 @@ function MainApp({ user, onLogout }) {
 
     if (user.token) {
       const today = new Date().toISOString().slice(0, 10)
-      Promise.all([stateApi.load(), tasksApi.list(today)])
-        .then(([remote, remoteTasks]) => {
-          setStars(remote.stars ?? 0)
-          setCompletedPomodoros(remote.completed_pomodoros ?? 0)
-          setInterruptions(remote.interruptions ?? 0)
-          setStickers(remote.stickers ?? [])
-          setTasks(remoteTasks.map(t => ({
-            id: t.id,
-            text: t.text,
-            emoji: t.emoji,
-            estimated: t.estimated_pomodoros,
-            completed: t.completed_pomodoros,
-            done: t.done,
-          })))
-        }).catch(() => {}).finally(() => setInitialized(true))
+      Promise.allSettled([stateApi.load(), tasksApi.list(today)])
+        .then(([stateResult, tasksResult]) => {
+          if (stateResult.status === 'fulfilled') {
+            const remote = stateResult.value
+            setStars(remote.stars ?? 0)
+            setCompletedPomodoros(remote.completed_pomodoros ?? 0)
+            setInterruptions(remote.interruptions ?? 0)
+            setStickers(remote.stickers ?? [])
+          }
+          if (tasksResult.status === 'fulfilled') {
+            setTasks(tasksResult.value.map(t => ({
+              id: t.id,
+              text: t.text,
+              emoji: t.emoji,
+              estimated: t.estimated_pomodoros,
+              completed: t.completed_pomodoros,
+              done: t.done,
+            })))
+          }
+        }).finally(() => setInitialized(true))
     } else {
       setInitialized(true)
     }
