@@ -7,7 +7,7 @@ import LoginScreen from './components/LoginScreen'
 import ActivityLog from './components/ActivityLog'
 import { loadState, saveState } from './utils/storage'
 import { supabase } from './lib/supabase'
-import { state as stateApi } from './lib/api'
+import { state as stateApi, sessions } from './lib/api'
 import { playChime, sendNotification, requestNotificationPermission } from './utils/notify'
 import { useTheme } from './hooks/useTheme'
 import './App.css'
@@ -25,6 +25,7 @@ function MainApp({ user, onLogout }) {
   const [showCelebration, setShowCelebration] = useState(null)
   const [isTimerRunning, setIsTimerRunning] = useState(false)
   const syncTimerRef = useRef(null)
+  const currentSessionId = useRef(null)
 
   // Request notification permission once on mount
   useEffect(() => { requestNotificationPermission() }, [])
@@ -92,6 +93,10 @@ function MainApp({ user, onLogout }) {
 
   const handlePomodoroComplete = useCallback(() => {
     addActivity('FOCUS_COMPLETE', '完成了一次专注 🌱')
+    if (user.token && currentSessionId.current) {
+      sessions.complete(currentSessionId.current).catch(() => {})
+      currentSessionId.current = null
+    }
     playChime('complete')
     sendNotification('🌱 专注时间结束！', '棒棒哒！给小芽浇过水了，去休息一下吧 💧')
     setStars(s => s + 1)
@@ -122,7 +127,11 @@ function MainApp({ user, onLogout }) {
 
   const handleFocusAbort = useCallback(() => {
     addActivity('FOCUS_ABORT', '中途放弃了这次专注 😔')
-  }, [addActivity])
+    if (user.token && currentSessionId.current) {
+      sessions.abandon(currentSessionId.current).catch(() => {})
+      currentSessionId.current = null
+    }
+  }, [addActivity, user.token])
 
   const handleInterrupt = useCallback(() => setInterruptions(i => i + 1), [])
 
@@ -138,10 +147,17 @@ function MainApp({ user, onLogout }) {
   }, [])
 
   const handleModeStart = useCallback((mode) => {
-    if (mode === 'focus') addActivity('FOCUS_START', '开始专注')
-    else if (mode === 'short_break') addActivity('BREAK_START', '开始短休息')
-    else if (mode === 'long_break') addActivity('BREAK_START', '开始长休息')
-  }, [addActivity])
+    if (mode === 'focus') {
+      addActivity('FOCUS_START', '开始专注')
+      if (user.token) {
+        sessions.start('focus').then(s => { currentSessionId.current = s.id }).catch(() => {})
+      }
+    } else if (mode === 'short_break') {
+      addActivity('BREAK_START', '开始短休息')
+    } else if (mode === 'long_break') {
+      addActivity('BREAK_START', '开始长休息')
+    }
+  }, [addActivity, user.token])
 
   return (
     <div className="app-shell">
