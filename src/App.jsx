@@ -3,7 +3,6 @@ import Header from './components/Header'
 import Timer from './components/Timer'
 import TaskList from './components/TaskList'
 import RewardPanel from './components/RewardPanel'
-import BreakScreen from './components/BreakScreen'
 import LoginScreen from './components/LoginScreen'
 import { loadState, saveState } from './utils/storage'
 import { playChime, sendNotification, requestNotificationPermission } from './utils/notify'
@@ -19,12 +18,8 @@ function MainApp({ user, onLogout }) {
   const [interruptions, setInterruptions] = useState(0)
   const [stickers, setStickers] = useState([])
   const [tasks, setTasks] = useState([])
-  const [showBreak, setShowBreak] = useState(false)
-  const [isLongBreak, setIsLongBreak] = useState(false)
-  const [breakTimeLeft, setBreakTimeLeft] = useState(0)
   const [showCelebration, setShowCelebration] = useState(null)
   const [isTimerRunning, setIsTimerRunning] = useState(false)
-  const breakIntervalRef = useRef(null)
 
   // Request notification permission once on mount
   useEffect(() => { requestNotificationPermission() }, [])
@@ -65,10 +60,6 @@ function MainApp({ user, onLogout }) {
           return [...s, emoji]
         })
       }
-      setIsLongBreak(n % 4 === 0)
-      setBreakTimeLeft(n % 4 === 0 ? 15 * 60 : 5 * 60)
-      setShowBreak(true)
-      setIsTimerRunning(false)
       return n
     })
   }, [])
@@ -76,20 +67,8 @@ function MainApp({ user, onLogout }) {
   const handleBreakEnd = useCallback(() => {
     playChime('break_end')
     sendNotification('⏰ 休息结束！', '准备好了吗？开始下一次专注 🌱')
-    setShowBreak(false)
   }, [])
   const handleInterrupt = useCallback(() => setInterruptions(i => i + 1), [])
-
-  useEffect(() => {
-    if (!showBreak) { clearInterval(breakIntervalRef.current); return }
-    breakIntervalRef.current = setInterval(() => {
-      setBreakTimeLeft(t => {
-        if (t <= 1) { clearInterval(breakIntervalRef.current); setShowBreak(false); return 0 }
-        return t - 1
-      })
-    }, 1000)
-    return () => clearInterval(breakIntervalRef.current)
-  }, [showBreak])
 
   const handleAddTask = useCallback((taskData) => {
     setTasks(prev => [...prev, {
@@ -126,16 +105,6 @@ function MainApp({ user, onLogout }) {
         <RewardPanel stars={stars} stickers={stickers} completedPomodoros={completedPomodoros} />
         <p className="app-footer-tip">专注25分钟 🌱 休息5分钟 · 4次专注后大休息 🌙</p>
       </main>
-
-      {showBreak && (
-        <BreakScreen
-          isLong={isLongBreak}
-          timeLeft={breakTimeLeft}
-          onSkip={() => setShowBreak(false)}
-          completedPomodoros={completedPomodoros}
-          stars={stars}
-        />
-      )}
 
       {showCelebration && (
         <div className="celebration-overlay">

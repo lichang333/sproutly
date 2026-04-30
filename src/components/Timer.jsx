@@ -19,6 +19,20 @@ const MODE_CONFIG = {
   LONG_BREAK:  { emoji: '🌙', label: '长休息',   color: '#CE82FF', shadow: '#9B4FCC', bg: 'timer-bg-night'  },
 }
 
+const SHORT_ACTIVITIES = [
+  { emoji: '💧', text: '喝一杯水' },
+  { emoji: '🙆', text: '伸展手臂' },
+  { emoji: '👀', text: '闭眼休息' },
+  { emoji: '😊', text: '和旁边人说话' },
+]
+
+const LONG_ACTIVITIES = [
+  { emoji: '🚶', text: '起来走一走' },
+  { emoji: '🍎', text: '吃点健康零食' },
+  { emoji: '🎵', text: '听一首喜欢的歌' },
+  { emoji: '🌤️', text: '看看窗外' },
+]
+
 export default function Timer({ onPomodoroComplete, onBreakEnd, onRunningChange, onModeStart }) {
   const { mode, timeLeft, isRunning, pomodoroCount, progress, start, pause, reset, switchMode } =
     useTimer({ onPomodoroComplete, onBreakEnd })
@@ -76,6 +90,21 @@ export default function Timer({ onPomodoroComplete, onBreakEnd, onRunningChange,
               style={i < pomodoroCount ? { background: cfg.color } : {}} />
           ))}
           <span className="timer-dots-hint">4次专注后大休息</span>
+        </div>
+      )}
+
+      {/* Break Activities */}
+      {mode !== 'FOCUS' && (
+        <div className="timer-break-activities" style={{ marginTop: '16px', textAlign: 'center' }}>
+          <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '12px' }}>休息期间可以：</p>
+          <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            {(mode === 'LONG_BREAK' ? LONG_ACTIVITIES : SHORT_ACTIVITIES).map((a, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--bg)', padding: '6px 12px', borderRadius: '100px', fontSize: '13px', color: 'var(--text-main)', border: '2px solid var(--border)' }}>
+                <span>{a.emoji}</span>
+                <span>{a.text}</span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
