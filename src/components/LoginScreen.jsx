@@ -1,24 +1,6 @@
 import { useState } from 'react'
+import { auth } from '../lib/api'
 import './LoginScreen.css'
-
-const INVITE_CODE = (import.meta.env.VITE_INVITE_CODE || 'SPROUT2026').trim().toUpperCase()
-
-function hashPassword(password) {
-  let hash = 0
-  for (let i = 0; i < password.length; i++) {
-    hash = ((hash << 5) - hash + password.charCodeAt(i)) | 0
-  }
-  return hash.toString(36)
-}
-
-function getAccounts() {
-  try { return JSON.parse(localStorage.getItem('pomodoro_accounts') || '{}') }
-  catch { return {} }
-}
-
-function saveAccounts(accounts) {
-  localStorage.setItem('pomodoro_accounts', JSON.stringify(accounts))
-}
 
 export default function LoginScreen({ onLogin }) {
   const [tab, setTab] = useState('login')
@@ -31,31 +13,27 @@ export default function LoginScreen({ onLogin }) {
 
   const reset = () => { setError(''); setSuccess('') }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault(); reset()
     if (!username.trim() || !password) return setError('请输入用户名和密码')
     setLoading(true)
 
-    const accounts = getAccounts()
-    const name = username.trim()
-
-    if (tab === 'login') {
-      const account = accounts[name]
-      if (!account) { setLoading(false); return setError('用户名不存在，请先注册 👇') }
-      if (account.passwordHash !== hashPassword(password)) { setLoading(false); return setError('密码错误，再试试吧！') }
-      onLogin({ username: name, role: account.role || 'child' })
-    } else {
-      if (name.length < 2) { setLoading(false); return setError('用户名至少2个字符') }
-      if (password.length < 4) { setLoading(false); return setError('密码至少4位') }
-      if (!inviteCode.trim()) { setLoading(false); return setError('请输入邀请码') }
-      if (inviteCode.trim().toUpperCase() !== INVITE_CODE) { setLoading(false); return setError('邀请码不正确') }
-      if (accounts[name]) { setLoading(false); return setError('用户名已存在，请直接登录') }
-      accounts[name] = { passwordHash: hashPassword(password), role: 'child', createdAt: Date.now() }
-      saveAccounts(accounts)
-      setSuccess('注册成功！正在进入...')
-      setTimeout(() => onLogin({ username: name, role: 'child' }), 700)
+    try {
+      let result
+      if (tab === 'login') {
+        result = await auth.login(username.trim(), password)
+      } else {
+        result = await auth.register(username.trim(), password, 'child', inviteCode.trim())
+        setSuccess('注册成功！正在进入...')
+        await new Promise(r => setTimeout(r, 700))
+      }
+      localStorage.setItem('pomodoro_token', result.token)
+      onLogin({ username: result.user.username, role: result.user.role, token: result.token })
+    } catch (err) {
+      setError(err.message || '操作失败，请重试')
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   return (
@@ -102,7 +80,6 @@ export default function LoginScreen({ onLogin }) {
             {loading ? '请稍候...' : tab === 'login' ? '开始专注 🌱' : '注册账号 ✨'}
           </button>
         </form>
-
       </div>
     </div>
   )
