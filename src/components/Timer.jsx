@@ -33,7 +33,7 @@ const LONG_ACTIVITIES = [
   { emoji: '🌤️', text: '看看窗外' },
 ]
 
-export default function Timer({ onPomodoroComplete, onBreakEnd, onRunningChange, onModeStart }) {
+export default function Timer({ onPomodoroComplete, onBreakEnd, onRunningChange, onModeStart, onFocusAbort }) {
   const { mode, timeLeft, isRunning, pomodoroCount, progress, start, pause, reset, switchMode } =
     useTimer({ onPomodoroComplete, onBreakEnd })
 
@@ -45,25 +45,19 @@ export default function Timer({ onPomodoroComplete, onBreakEnd, onRunningChange,
     start()
   }
 
+  const handleReset = () => {
+    if (mode === 'FOCUS' && progress > 0) {
+      onFocusAbort?.()
+    }
+    reset()
+  }
+
   const cfg = MODE_CONFIG[mode]
   const dashOffset = CIRCUMFERENCE * (1 - progress)
+  const isPaused = !isRunning && progress > 0 && progress < 1
 
   return (
     <div className={`timer-card card ${cfg.bg}`}>
-      {/* Mode tabs */}
-      <div className="timer-tabs">
-        {Object.entries(MODES).map(([key, val]) => (
-          <button
-            key={key}
-            onClick={() => switchMode(key)}
-            className={`timer-tab ${mode === key ? 'active' : ''}`}
-            style={mode === key ? { color: MODE_CONFIG[key].color } : {}}
-          >
-            {val.label}
-          </button>
-        ))}
-      </div>
-
       {/* SVG ring */}
       <div className="timer-ring-wrap">
         <svg width={SIZE} height={SIZE} className="timer-svg">
@@ -77,40 +71,43 @@ export default function Timer({ onPomodoroComplete, onBreakEnd, onRunningChange,
         </svg>
         <div className="timer-center">
           <span className="timer-emoji">{cfg.emoji}</span>
-          <span className="timer-time">{formatTime(timeLeft)}</span>
+          <span className="timer-time" style={{ opacity: isPaused ? 0.4 : 1, transition: 'opacity 0.3s ease' }}>
+            {formatTime(timeLeft)}
+          </span>
           <span className="timer-label">{cfg.label}</span>
         </div>
       </div>
 
-      {/* Pomodoro progress dots */}
-      {mode === 'FOCUS' && (
-        <div className="timer-dots">
+      {/* Info Section (Dots & Activities) */}
+      <div className="timer-info-section" style={{ minHeight: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', width: '100%' }}>
+        {/* Pomodoro progress dots (Always visible) */}
+        <div className="timer-dots" style={{ marginBottom: mode !== 'FOCUS' ? '12px' : '0' }}>
           {[0,1,2,3].map(i => (
             <div key={i} className={`timer-dot ${i < pomodoroCount ? 'filled' : ''}`}
               style={i < pomodoroCount ? { background: cfg.color } : {}} />
           ))}
           <span className="timer-dots-hint">4次专注后大休息</span>
         </div>
-      )}
 
-      {/* Break Activities */}
-      {mode !== 'FOCUS' && (
-        <div className="timer-break-activities" style={{ marginTop: '16px', textAlign: 'center' }}>
-          <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '12px' }}>休息期间可以：</p>
-          <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            {(mode === 'LONG_BREAK' ? LONG_ACTIVITIES : SHORT_ACTIVITIES).map((a, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--bg)', padding: '6px 12px', borderRadius: '100px', fontSize: '13px', color: 'var(--text-main)', border: '2px solid var(--border)' }}>
-                <span>{a.emoji}</span>
-                <span>{a.text}</span>
-              </div>
-            ))}
+        {/* Break Activities */}
+        {mode !== 'FOCUS' && (
+          <div className="timer-break-activities" style={{ width: '100%', textAlign: 'center', animation: 'fade-in 0.3s ease' }}>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '8px' }}>休息期间可以：</p>
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              {(mode === 'LONG_BREAK' ? LONG_ACTIVITIES : SHORT_ACTIVITIES).map((a, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--bg)', padding: '4px 10px', borderRadius: '100px', fontSize: '12px', color: 'var(--text-main)', border: '2px solid var(--border)' }}>
+                  <span>{a.emoji}</span>
+                  <span>{a.text}</span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Controls */}
       <div className="timer-controls">
-        <button className="btn btn-ghost timer-reset" onClick={reset} title="重置">↺</button>
+        <button className="btn btn-ghost timer-reset" onClick={handleReset} title="重置">↺</button>
         <button
           className="timer-play-btn"
           style={{ background: cfg.color, boxShadow: `0 5px 0 ${cfg.shadow}` }}
