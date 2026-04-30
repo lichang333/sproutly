@@ -20,7 +20,7 @@ export function sendNotification(title, body, options = {}) {
   setTimeout(() => n.close(), 6000)
 }
 
-// Singleton AudioContext — created once and unlocked on first user gesture
+// Singleton AudioContext — unlocked silently on first click anywhere
 let _ctx = null
 
 function getCtx() {
@@ -30,13 +30,13 @@ function getCtx() {
   return _ctx
 }
 
-// Call this on any user interaction (button click) to unlock audio
-export function unlockAudio() {
+function unlockOnFirstClick() {
   try {
     const ctx = getCtx()
     if (ctx.state === 'suspended') ctx.resume()
   } catch {}
 }
+document.addEventListener('click', unlockOnFirstClick, { once: true })
 
 export function playChime(type = 'complete') {
   try {
