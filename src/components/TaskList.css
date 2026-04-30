@@ -105,6 +105,13 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
+}
+
+.task-edit-row .btn {
+  white-space: nowrap;
+  min-width: 56px;
+  flex-shrink: 0;
 }
 
 .emoji-select-sm {
