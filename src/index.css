@@ -1,0 +1,202 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Design System — 小芽专注
+   ============================================================ */
+
+:root {
+  /* Brand */
+  --brand-pink: #FF6B9D;
+  --brand-light: #FFB3CC;
+  --brand-pale: #FFF0F5;
+
+  /* Tomato (primary action) */
+  --tomato: #FF4B4B;
+  --tomato-dark: #E03030;
+  --tomato-light: #FFE5E5;
+
+  /* Functional accents */
+  --duo-green: #58CC02;
+  --duo-green-dark: #46A302;
+  --duo-blue: #1CB0F6;
+  --duo-yellow: #FFD900;
+  --duo-orange: #FF9600;
+  --duo-purple: #CE82FF;
+
+  /* Light mode surfaces */
+  --bg: #F5F5FA;
+  --bg-card: #FFFFFF;
+  --bg-card2: #F0F0F5;
+  --bg-input: #FFFFFF;
+  --border: #E8E8F0;
+  --text-dark: #2E2E3A;
+  --text-mid: #7A7A8C;
+  --text-light: #B0B0C0;
+
+  /* Shadows */
+  --shadow: 0 4px 0 rgba(0, 0, 0, 0.08);
+  --shadow-card: 0 2px 16px rgba(100, 80, 160, 0.07);
+  --shadow-btn: 0 4px 0 rgba(0, 0, 0, 0.12);
+  --shadow-pink: 0 4px 0 #D94F7C;
+  --shadow-green: 0 4px 0 #389E00;
+  --shadow-tomato: 0 4px 0 #B83030;
+
+  /* Typography */
+  --font: 'Nunito', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+
+  /* Radius */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+}
+
+[data-theme="dark"] {
+  --bg: #0F0F1C;
+  --bg-card: #1A1A2E;
+  --bg-card2: #22223A;
+  --bg-input: #1A1A2E;
+  --border: #2A2A42;
+  --text-dark: #EEEEF8;
+  --text-mid: #9090A8;
+  --text-light: #5A5A72;
+  --shadow-card: 0 2px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================================
+   Reset & Base
+   ============================================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  font-family: var(--font);
+  font-size: 15px;
+  color: var(--text-dark);
+  background: var(--bg);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ============================================================
+   Shared utility classes
+   ============================================================ */
+
+.app-shell {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  position: relative;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 16px;
+}
+
+/* 3D button base */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: var(--font);
+  font-weight: 800;
+  font-size: 15px;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  padding: 12px 20px;
+  line-height: 1;
+  user-select: none;
+}
+
+.btn:active {
+  transform: translateY(3px);
+}
+
+.btn-primary {
+  background: var(--brand-pink);
+  color: #fff;
+  box-shadow: var(--shadow-pink);
+}
+.btn-primary:active { box-shadow: 0 1px 0 #D94F7C; }
+
+.btn-tomato {
+  background: var(--tomato);
+  color: #fff;
+  box-shadow: var(--shadow-tomato);
+}
+.btn-tomato:active { box-shadow: 0 1px 0 #882020; }
+
+.btn-green {
+  background: var(--duo-green);
+  color: #fff;
+  box-shadow: var(--shadow-green);
+}
+.btn-green:active { box-shadow: 0 1px 0 #236600; }
+
+.btn-ghost {
+  background: var(--bg-card2);
+  color: var(--text-mid);
+  box-shadow: 0 4px 0 var(--border);
+}
+.btn-ghost:active { box-shadow: 0 1px 0 var(--border); }
+
+.btn-full { width: 100%; }
+.btn-lg { font-size: 17px; padding: 16px 24px; border-radius: var(--radius-lg); }
+.btn-sm { font-size: 13px; padding: 8px 14px; border-radius: var(--radius-sm); }
+
+/* Input */
+.input {
+  width: 100%;
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-dark);
+  background: var(--bg-input);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.input::placeholder { color: var(--text-light); font-weight: 600; }
+
+.input:focus {
+  border-color: var(--brand-pink);
+  box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.12);
+}
+
+/* Progress bar */
+.progress-track {
+  height: 10px;
+  background: var(--border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.4s ease;
+}

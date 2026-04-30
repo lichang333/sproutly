@@ -1,0 +1,215 @@
+.task-card { display: flex; flex-direction: column; gap: 12px; }
+
+.task-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--text-dark);
+}
+
+.interrupt-btn {
+  border-color: var(--duo-orange);
+  color: var(--duo-orange);
+  background: #FFF5E5;
+}
+
+/* List */
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.task-empty {
+  text-align: center;
+  color: var(--text-light);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 20px 0;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--bg-card2);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: all 0.15s ease;
+}
+
+.task-item.done {
+  opacity: 0.5;
+  border-color: var(--duo-green);
+  background: #F2FFF0;
+}
+
+.task-emoji { font-size: 20px; flex-shrink: 0; }
+
+.task-text {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-dark);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-item.done .task-text {
+  text-decoration: line-through;
+  color: var(--text-mid);
+}
+
+.task-tomatoes { display: flex; gap: 2px; flex-shrink: 0; }
+.task-tomato-dot { font-size: 12px; opacity: 0.25; }
+.task-tomato-dot.filled { opacity: 1; }
+
+.task-check-btn {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--duo-green);
+  background: #F0FFF0;
+  color: var(--duo-green);
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.1s;
+  flex-shrink: 0;
+}
+.task-check-btn:active { transform: scale(0.9); }
+
+.task-del-btn {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: transparent;
+  color: var(--text-light);
+  font-size: 11px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.1s;
+  flex-shrink: 0;
+}
+.task-del-btn:hover { border-color: var(--tomato); color: var(--tomato); background: var(--tomato-light); }
+
+/* Form */
+.task-form { display: flex; flex-direction: column; gap: 8px; border-top: 2px solid var(--border); padding-top: 12px; }
+
+.task-form-row { display: flex; align-items: center; gap: 8px; }
+
+.task-form-bottom { flex-wrap: wrap; gap: 8px; }
+
+.emoji-select {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 56px;
+  height: 52px;
+  font-size: 20px;
+  line-height: 1;
+  text-align: center;
+  text-align-last: center;
+  background: var(--bg-card2);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+}
+
+.task-input { font-size: 14px; padding: 11px 14px; }
+
+.pomodoro-picker { display: flex; gap: 4px; flex-wrap: wrap; }
+
+.pomodoro-pick-btn {
+  padding: 5px 8px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 11px;
+  font-family: var(--font);
+  font-weight: 800;
+  background: var(--bg-card2);
+  color: var(--text-mid);
+  cursor: pointer;
+  transition: all 0.1s;
+}
+.pomodoro-pick-btn.active {
+  background: var(--brand-pale);
+  border-color: var(--brand-pink);
+  color: var(--brand-pink);
+}
+
+@media (max-width: 420px) {
+  .task-card {
+    gap: 10px;
+  }
+
+  .task-form-row {
+    gap: 8px;
+  }
+
+  .emoji-select {
+    width: 52px;
+    height: 50px;
+    flex: 0 0 52px;
+  }
+
+  .pomodoro-picker {
+    gap: 6px;
+  }
+
+  .pomodoro-pick-btn {
+    min-width: 34px;
+    min-height: 32px;
+    padding: 5px 7px;
+  }
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+}
+
+.modal-card {
+  background: var(--bg-card);
+  border-radius: 24px;
+  padding: 28px 20px 20px;
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+}
+
+.modal-icon { font-size: 48px; }
+.modal-title { font-size: 18px; font-weight: 900; color: var(--text-dark); }
+.modal-desc { font-size: 13px; font-weight: 600; color: var(--text-mid); text-align: center; }
+
+.interrupt-textarea {
+  height: 80px;
+  resize: none;
+  width: 100%;
+  font-size: 14px;
+}
+
+.modal-actions { display: flex; gap: 8px; width: 100%; }

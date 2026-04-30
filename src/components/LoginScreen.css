@@ -1,0 +1,127 @@
+.login-bg {
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(160deg, #D94F7C 0%, #FF6B9D 40%, #FF9EC4 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-card {
+  background: var(--bg-card);
+  border-radius: 28px;
+  padding: 32px 24px 24px;
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 8px 40px rgba(180, 40, 80, 0.25);
+}
+
+.login-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.login-logo-icon {
+  width: 78px;
+  height: 78px;
+  border-radius: 18px;
+  box-shadow: 0 6px 18px rgba(180, 40, 80, 0.2);
+  animation: bloom 3s ease-in-out infinite;
+}
+
+@keyframes bloom {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50%       { transform: scale(1.12) rotate(5deg); }
+}
+
+.login-title {
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--text-dark, #2E2E3A);
+  letter-spacing: -0.5px;
+}
+
+.login-subtitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-mid);
+}
+
+.login-tabs {
+  display: flex;
+  background: var(--bg-card2, #F0F0F5);
+  border-radius: 14px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.login-tab {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-mid, #7A7A8C);
+  transition: all 0.15s ease;
+}
+
+.login-tab.active {
+  background: var(--bg-card);
+  color: var(--text-dark, #2E2E3A);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-mid, #7A7A8C);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding-left: 4px;
+}
+
+.form-error {
+  background: #FFF0F0;
+  border: 2px solid #FFD0D0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--tomato, #FF4B4B);
+  text-align: center;
+}
+
+.form-success {
+  background: #F0FFF0;
+  border: 2px solid #C0EEC0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--duo-green, #58CC02);
+  text-align: center;
+}

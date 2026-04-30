@@ -1,0 +1,107 @@
+.break-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.break-short { background: linear-gradient(160deg, #2E8B4A 0%, #58CC02 50%, #A8E066 100%); }
+.break-long  { background: linear-gradient(160deg, #1A5FA8 0%, #1CB0F6 50%, #7AD8FF 100%); }
+
+.break-card {
+  background: #fff;
+  border-radius: 28px;
+  padding: 28px 20px 20px;
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+}
+
+.break-icon { font-size: 56px; }
+
+.break-title {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--text-dark);
+}
+
+.break-subtitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-mid);
+  text-align: center;
+}
+
+.break-timer {
+  font-size: 52px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -2px;
+  color: var(--brand-pink);
+}
+
+.break-stats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: var(--bg-card2);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 12px 24px;
+}
+
+.break-stat { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.break-stat-val { font-size: 24px; font-weight: 900; color: var(--text-dark); }
+.break-stat-label { font-size: 11px; font-weight: 700; color: var(--text-mid); }
+.break-stat-divider { width: 2px; height: 36px; background: var(--border); }
+
+.break-activities { width: 100%; }
+
+.break-activities-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-mid);
+  text-align: center;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.break-activities-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.break-activity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--bg-card2);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.break-activity-emoji { font-size: 20px; }
+.break-activity-text { font-size: 13px; font-weight: 700; color: var(--text-dark); }
+
+.break-skip {
+  background: none;
+  border: none;
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-light);
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color 0.15s;
+}
+.break-skip:hover { color: var(--text-mid); }
